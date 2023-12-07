@@ -1,3 +1,5 @@
+use crate::decimal_numbers::extract_decimal_number;
+
 pub(crate) fn impossible_games(){
     let games_data = "Game 1: 14 green, 8 blue, 9 red; 5 blue, 4 green, 2 red; 4 red, 4 blue, 4 green; 1 blue, 3 green, 2 red; 10 red, 3 blue, 15 green; 2 red, 6 green, 3 blue
     Game 2: 1 red, 12 green, 2 blue; 2 green, 1 blue, 1 red; 4 green, 2 blue; 10 green, 3 blue; 4 green, 2 red, 2 blue
@@ -190,31 +192,4 @@ fn extract_nr_of_a_color(rest: &[char]) -> u32 {
         }
         __ => 0
     }
-}
-
-
-fn extract_decimal_number(rest: &[char]) -> u32 {
-    let first = rest
-        .get(0)
-        .and_then(|c| -> Option<u32> {c.to_digit(10)});
-
-    let second = rest
-        .get(1)
-        .and_then(|c| -> Option<u32> {c.to_digit(10)});
-
-    let third = rest
-        .get(2)
-        .and_then(|c| -> Option<u32> {c.to_digit(10)});
-
-    let value = match (first, second, third) {
-        (Some(hundreds),  Some(tens), Some(ones)) => 100*hundreds+10*tens+ones,
-        ( Some(tens), Some(ones), None) => 10*tens+ones,
-        (None,  Some(tens), Some(ones)) => 10*tens+ones,
-        (None, None, Some(ones)) => ones,
-        (Some(ones),None, None) => ones, 
-        (None, Some(ones), None) => ones,
-        (None, None, None) => panic!(),
-        (Some(_), None, Some(_)) => panic!()
-    };
-    value
 }
