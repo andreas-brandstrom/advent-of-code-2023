@@ -5,11 +5,13 @@ fn main() {
         day_3::schematic();
         day_4::scratchcards();
         day_5::seed_to_destination();
+        day_6::boat_race();
     }
 
-    day_6::boat_race();
+    day_7::camel_cards();
 }
 
+mod day_7;
 mod day_6;
 mod day_5;
 mod day_4;
