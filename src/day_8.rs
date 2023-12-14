@@ -803,7 +803,7 @@ pub(crate) fn haunted_wastland() {
     all_factors.dedup();
 
     let lcm:u64 = all_factors.iter()
-        .map(|(f,p)| f.pow((*p as u32)) as u64)
+        .map(|(f,p)| f.pow(*p as u32) as u64)
         .product();
 
     println!("lcm = {}",lcm);
