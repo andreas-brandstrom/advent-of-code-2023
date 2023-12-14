@@ -6,11 +6,13 @@ fn main() {
         day_4::scratchcards();
         day_5::seed_to_destination();
         day_6::boat_race();
+        day_7::camel_cards();
     }
 
-    day_7::camel_cards();
+    day_8::haunted_wastland(); 
 }
 
+mod day_8;
 mod day_7;
 mod day_6;
 mod day_5;
