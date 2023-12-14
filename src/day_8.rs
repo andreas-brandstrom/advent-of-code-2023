@@ -752,107 +752,61 @@ pub(crate) fn haunted_wastland() {
 
     let node_map: HashMap<[char; 3], ([char; 3], [char; 3])> = parse_node_map(node_map);
 
-    let possible_finishes = find_finishing_starts(&node_map, &instructions);
-
-    let full_instructions_map = create_full_instructions_map(&node_map, &instructions);
-
-    let mut current_nodes: Vec<(&[char;3],&([char;3],[char;3]))> = node_map.iter()
+    let starting_nodes: Vec<(&[char;3],&([char;3],[char;3]))>  = node_map.iter()
         .filter(|(&k,_)| k[2] == 'A')
         .collect();
 
-    let mut will_get_to_final_nodes: bool = false;
+    let finish_nodes: Vec<(&[char;3],&([char;3],[char;3]))>  = node_map.iter()
+        .filter(|(&k,_)| k[2] == 'Z')
+        .collect();
 
-    let mut steps:u64 = 0;
-    let mut final_steps = (instructions.len()+1) as u32;
-
-    loop {
-        for (s, finishing_node) in &possible_finishes {
-            let will_finish:Vec<&[char;3]> = current_nodes.iter()
-                .filter(|&(n,_)| finishing_node.contains(n))
-                .map(|&n| n.0).collect();
-
-            if will_finish.len() == current_nodes.len() && final_steps > *s {
-                will_get_to_final_nodes = true;
-                final_steps = *s;
-            }
-        }
-
-        if will_get_to_final_nodes {
-            steps += final_steps as u64;
-            break;
-        }
-
-        let mut next_nodes:Vec<(&[char;3],&([char;3],[char;3]))> = vec![];
-
-        for current_node in current_nodes {
-            let mut next_node = current_node;
-
-            match full_instructions_map.get(current_node.0) {
-                Some(node) => next_node = *node,
+    let mut all_factors:Vec<(usize,usize)> = vec![];
+    
+    for starting_node in &starting_nodes {
+        let mut steps = 0;
+        let mut next_node = starting_node.0;
+        for instruction in instructions.iter().cycle() {
+            let direction = match node_map.get(next_node) {
+                Some(n) => n,
                 None => panic!()
             };
 
-            next_nodes.push(next_node);
-        }
-
-        current_nodes = next_nodes;
-        
-        steps += instructions.len() as u64;
-
-
-        let n:Vec<&[char;3]> = current_nodes.iter().map(|&(n,_)| n).collect();
-        println!("{:?}", n);
-        println!("{} of {}  s:{}", full_instructions_map.len(), node_map.len(), steps);
-    }
-    
-    println!("Steps {}", steps);
-}
-
-fn create_full_instructions_map<'a>(node_map: &'a HashMap<[char; 3], ([char; 3], [char; 3])>, instructions: &Vec<char>) -> HashMap<[char; 3], (&'a[char; 3], &'a([char; 3], [char; 3]))> {
-    let mut full_instructions_map: HashMap<[char;3],(&[char;3],&([char;3],[char;3]))> = HashMap::with_capacity(node_map.capacity());
-
-    for node in node_map {
-        let mut next_node = node;
-
-        for instruction in instructions {
             next_node = match instruction {
-                    'L' => node_map.get_key_value(&next_node.1.0).unwrap(),
-                    'R' => node_map.get_key_value(&next_node.1.1).unwrap(),
-                    _ => panic!("unkown instruction")
+                'L' => &direction.0,
+                'R' => &direction.1,
+                _ => panic!(),                
             };
 
-           full_instructions_map.insert(*node.0, next_node);
+            steps += 1;
 
-        };
+            let a_finish:Vec<&(&[char; 3], &([char; 3], [char; 3]))> = finish_nodes.iter()
+                .filter(|&(&s, _)| s == *next_node)
+                .collect();
+
+            if a_finish.len() > 0 {
+                let seive = primal::Sieve::new(1000);
+                let mut factors  = match seive.factor(steps) {
+
+                    Ok(fac) => fac,
+                    Err(_ ) => panic!()
+                    
+                };
+
+                all_factors.append(factors.as_mut());
+                break;
+            }
+        }
     }
-    full_instructions_map
-}
-
-fn find_finishing_starts(node_map: &HashMap<[char; 3], ([char; 3], [char; 3])>, instructions: &Vec<char>) -> Vec<(u32, Vec<[char; 3]>)> {
-    let final_nodes: Vec<[char;3]> = node_map.iter()
-        .map(|(&k,_)| k)
-        .filter(|k| k[2] == 'Z')
-        .collect();
     
-    let mut possible_starts:Vec<(u32,Vec<[char;3]>)> = vec![];
-    for i in 1..=instructions.len() {
-        let mut current_nodes:Vec<[char;3]> = final_nodes.clone();
-        for instruction in instructions.iter().take(i).rev() {
-            current_nodes = node_map.iter().filter(|&(_,d)| {
-                match instruction {
-                    'L' => current_nodes.contains(&d.0),
-                    'R' => current_nodes.contains(&d.1),
-                    _ => panic!("Invalid instruction")
-                }
-            })
-            .map(|(&k,_)| k)
-            .collect();
-        }
-        if current_nodes.len() >= final_nodes.len() {
-            possible_starts.push((i as u32,current_nodes))
-        }
-    }
-    possible_starts
+    all_factors.sort();
+
+    all_factors.dedup();
+
+    let lcm:u64 = all_factors.iter()
+        .map(|(f,p)| f.pow((*p as u32)) as u64)
+        .product();
+
+    println!("lcm = {}",lcm);
 }
 
 fn parse_node_map(node_map: &str) -> HashMap<[char; 3], ([char; 3], [char; 3])> {
