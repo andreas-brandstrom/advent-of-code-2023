@@ -754,7 +754,7 @@ pub(crate) fn haunted_wastland() {
 
     let possible_finishes = find_finishing_starts(&node_map, &instructions);
 
-    let mut full_instructions_map: HashMap<[char;3],(&[char;3],&([char;3],[char;3]))> = HashMap::with_capacity(node_map.capacity());
+    let full_instructions_map = create_full_instructions_map(&node_map, &instructions);
 
     let mut current_nodes: Vec<(&[char;3],&([char;3],[char;3]))> = node_map.iter()
         .filter(|(&k,_)| k[2] == 'A')
@@ -789,18 +789,7 @@ pub(crate) fn haunted_wastland() {
 
             match full_instructions_map.get(current_node.0) {
                 Some(node) => next_node = *node,
-                None => {
-                    println!("iteration");
-                    for instruction in &instructions {
-                        next_node = match instruction {
-                                'L' => node_map.get_key_value(&next_node.1.0).unwrap(),
-                                'R' => node_map.get_key_value(&next_node.1.1).unwrap(),
-                                _ => panic!("unkown instruction")
-                        };
-                    }
-
-                    full_instructions_map.insert(*current_node.0, next_node);
-                }
+                None => panic!()
             };
 
             next_nodes.push(next_node);
@@ -817,6 +806,26 @@ pub(crate) fn haunted_wastland() {
     }
     
     println!("Steps {}", steps);
+}
+
+fn create_full_instructions_map<'a>(node_map: &'a HashMap<[char; 3], ([char; 3], [char; 3])>, instructions: &Vec<char>) -> HashMap<[char; 3], (&'a[char; 3], &'a([char; 3], [char; 3]))> {
+    let mut full_instructions_map: HashMap<[char;3],(&[char;3],&([char;3],[char;3]))> = HashMap::with_capacity(node_map.capacity());
+
+    for node in node_map {
+        let mut next_node = node;
+
+        for instruction in instructions {
+            next_node = match instruction {
+                    'L' => node_map.get_key_value(&next_node.1.0).unwrap(),
+                    'R' => node_map.get_key_value(&next_node.1.1).unwrap(),
+                    _ => panic!("unkown instruction")
+            };
+
+           full_instructions_map.insert(*node.0, next_node);
+
+        };
+    }
+    full_instructions_map
 }
 
 fn find_finishing_starts(node_map: &HashMap<[char; 3], ([char; 3], [char; 3])>, instructions: &Vec<char>) -> Vec<(u32, Vec<[char; 3]>)> {
