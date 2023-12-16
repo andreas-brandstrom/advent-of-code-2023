@@ -7,11 +7,15 @@ fn main() {
         day_5::seed_to_destination();
         day_6::boat_race();
         day_7::camel_cards();
+        day_8::haunted_wastland(); 
+        day_9::oasis();
     }
 
-    day_8::haunted_wastland(); 
+    day_10::pipe_maze();
 }
 
+mod day_10;
+mod day_9;
 mod day_8;
 mod day_7;
 mod day_6;
