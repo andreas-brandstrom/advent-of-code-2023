@@ -216,7 +216,7 @@ pub(crate) fn oasis() {
     println!("Sum: ({},{})",previous_sum, next_sum);
 }
 
-fn previous_value(sensor_history: &Vec<i32>) ->  i32 {
+fn previous_value(sensor_history: &[i32]) ->  i32 {
     let mut sensor_history_iter= sensor_history.iter();
         
     let mut last_number = sensor_history_iter.next().unwrap();
@@ -235,7 +235,7 @@ fn previous_value(sensor_history: &Vec<i32>) ->  i32 {
     sensor_history[0] - previous_value(&diff_values)   
 }
 
-fn next_value(sensor_history: &Vec<i32>) ->  i32 {
+fn next_value(sensor_history: &[i32]) ->  i32 {
     let mut sensor_history_iter= sensor_history.iter();
         
     let mut last_number = sensor_history_iter.next().unwrap();

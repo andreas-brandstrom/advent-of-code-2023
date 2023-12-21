@@ -1,5 +1,7 @@
 use std::{collections::HashMap, char};
 
+type NodeDirections<'a> = (&'a [char; 3], &'a([char; 3], [char; 3]));
+
 pub(crate) fn haunted_wastland() {
     let data = 
         "LRLRLLRLRLRRLRLRLRRLRLRLLRRLRRLRLRLRLLRRRLRRRLLRRLRLRLRRRLRRLRRRLRLRLRRLRLLRLRLRRLRRRLRLRRLRRRLLRLRLRRRLRRRLRLRRRLRLRRRLLRRLLLRRRLLRRRLRRRLRRRLRLRLRLLRLRRLRLRLLLRRLRRLRRLRLRRLRRLLRRLRLRRRLRLRLLRRRLRRRLRRRLLLRRRLRLRLRRLRRRLRRRLRLRRRLRRLRRRLRLRRLLRRRLRRRLLLRRLRLRLRRLRRRLRRLRRLRLRRRR
@@ -743,7 +745,7 @@ pub(crate) fn haunted_wastland() {
         RLB = (TTV, MJB)
         NDS = (RQX, CQD)";
 
-    let (instructions, node_map) = match data.split_once("\n") {
+    let (instructions, node_map) = match data.split_once('\n') {
         Some(s) => s,
         None => panic!("Invalid input")
     };
@@ -752,11 +754,11 @@ pub(crate) fn haunted_wastland() {
 
     let node_map: HashMap<[char; 3], ([char; 3], [char; 3])> = parse_node_map(node_map);
 
-    let starting_nodes: Vec<(&[char;3],&([char;3],[char;3]))>  = node_map.iter()
+    let starting_nodes: Vec<NodeDirections>  = node_map.iter()
         .filter(|(&k,_)| k[2] == 'A')
         .collect();
 
-    let finish_nodes: Vec<(&[char;3],&([char;3],[char;3]))>  = node_map.iter()
+    let finish_nodes: Vec<NodeDirections>  = node_map.iter()
         .filter(|(&k,_)| k[2] == 'Z')
         .collect();
 
@@ -779,11 +781,11 @@ pub(crate) fn haunted_wastland() {
 
             steps += 1;
 
-            let a_finish:Vec<&(&[char; 3], &([char; 3], [char; 3]))> = finish_nodes.iter()
+            let a_finish:Vec<&NodeDirections> = finish_nodes.iter()
                 .filter(|&(&s, _)| s == *next_node)
                 .collect();
 
-            if a_finish.len() > 0 {
+            if !a_finish.is_empty() {
                 let seive = primal::Sieve::new(1000);
                 let mut factors  = match seive.factor(steps) {
 
@@ -817,19 +819,11 @@ fn parse_node_map(node_map: &str) -> HashMap<[char; 3], ([char; 3], [char; 3])> 
         window.rotate_left(1);
         window[window.len() -1] = char;
 
-        match window {
-            [n_1,n_2,n_3,' ','=',' ','(', l_1, l_2, l_3,',',' ', r_1, r_2, r_3,.. ] => {
-                let node = [n_1,n_2,n_3];
-                let left = [l_1,l_2,l_3];
-                let right = [r_1,r_2,r_3];
-
-                match nodes.insert(node,(left,right)) {
-                    Some(_) => panic!("key already exists"),
-                    None => ()
-                }
-            }
-            
-            _ => ()
+        if let [n_1,n_2,n_3,' ','=',' ','(', l_1, l_2, l_3,',',' ', r_1, r_2, r_3,.. ] = window {
+            let node = [n_1,n_2,n_3];
+            let left = [l_1,l_2,l_3];
+            let right = [r_1,r_2,r_3];
+            if nodes.insert(node,(left,right)).is_some() { panic!("key already exists") };
         }
     }
     nodes

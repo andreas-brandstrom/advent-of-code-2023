@@ -14,7 +14,7 @@ pub(crate) fn boat_race() {
   
     let sum: u64 = races.iter()
         .map(|&race| number_of_ways_to_win(race))
-        .fold(1, |acc, n| acc*n);
+        .product();
 
     println!("Sum: {} ",sum)
 }
@@ -28,7 +28,5 @@ fn number_of_ways_to_win(race: (&u64,&u64)) -> u64 {
     let start = d_2.ceil() as u32;
     let finish = d_1.floor() as u32;
 
-    let number_of_ways = Vec::from_iter(start..=finish).len() as u64;
-
-    number_of_ways   
+    Vec::from_iter(start..=finish).len() as u64 
 }

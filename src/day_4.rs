@@ -210,7 +210,7 @@ pub(crate) fn scratchcards() {
     let mut total_number_of_cards = 0;
     for (i,line) in lines.iter().enumerate(){
         let number_of_cards = match number_scratch_cards.get(i) {
-            Some(num) => num.clone(),
+            Some(num) => *num,
             None => break
         };
 
@@ -245,7 +245,7 @@ pub(crate) fn scratchcards() {
 
         point_sum += match length {
             1 => 1,
-            1.. => 2_u32.pow(length-1), 
+            2.. => 2_u32.pow(length-1), 
             _ => 0
         };
     }

@@ -18,7 +18,7 @@ impl Move {
     }
 
     fn next_move(&self, tile: &char) -> Option<Self> {
-        let next_move = match (self, tile) {
+        match (self, tile) {
             (Move::Up | Move::Down, '|') => Some(*self),
             (Move::Right | Move::Left, '-') => Some(*self),
             (Move::Up, 'F') => Some(Move::Right),
@@ -30,8 +30,7 @@ impl Move {
             (Move::Right, 'J') => Some(Move::Up),
             (Move::Right, '7') => Some(Move::Down),
             _ => None
-        };
-        next_move
+        }
     }
 }
 
@@ -294,8 +293,10 @@ fn initial_moves(maze: na::Matrix<char, na::Const<140>, na::Const<140>, na::Arra
 
 
 
-fn parse_data(data: &str) -> (na::Matrix<char, na::Const<140>, na::Const<140>, na::ArrayStorage<char, 140, 140>>, (usize, usize)) {
-    let data = data.replace(" ", "");
+type Matrix140Char = na::Matrix<char, na::Const<140>, na::Const<140>, na::ArrayStorage<char, 140, 140>>;
+
+fn parse_data(data: &str) -> (Matrix140Char, (usize, usize)) {
+    let data = data.replace(' ', "");
 
     let mut maze  = na::Matrix::<char, na::Const<140>, na::Const<140>, na::ArrayStorage<char, 140, 140>>::from_element('.');
 

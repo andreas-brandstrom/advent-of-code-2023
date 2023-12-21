@@ -39,8 +39,8 @@ impl PartNumber {
             _ => panic!()
         };
     
-        let min_x = coordinate.0.checked_sub(size).unwrap_or(0);
-        let min_y = coordinate.1.checked_sub(1).unwrap_or(0);
+        let min_x = coordinate.0.saturating_sub(size);
+        let min_y = coordinate.1.saturating_sub(1);
         let max_x = coordinate.0+1;
         let max_y = coordinate.1+1;
     
@@ -48,8 +48,7 @@ impl PartNumber {
             top_left_corner: Coordinate(min_x, min_y),
             bottom_right_corner: Coordinate(max_x, max_y)};
     
-        let part_number = PartNumber{ value, adjacent_area};
-        part_number
+        PartNumber{ value, adjacent_area}
     } 
 }
 
@@ -244,16 +243,13 @@ fn parse_schematic(schematic: &str) -> (Vec<PartNumber>, Vec<Coordinate>, Vec<Co
         window.rotate_left(1);
         window[window.len()-1] = char;
 
-        match window {
-            [.., '0'..='9', '\n' | '\u{0021}'..='\u{002f}' | '\u{003a}'..='\u{0040}'] => { 
-                let slice = &window[window.len()-4..window.len()-1];
-                let value = extract_decimal_number(slice);
-                let coordinate = Coordinate(x_coordinate-1, y_coordinate);
-                let part_number = PartNumber::create(value, &coordinate);
-                parts_list.push(part_number);
-            },
-            _ => ()
-        }
+        if let [.., '0'..='9', '\n' | '\u{0021}'..='\u{002f}' | '\u{003a}'..='\u{0040}'] = window { 
+            let slice = &window[window.len()-4..window.len()-1];
+            let value = extract_decimal_number(slice);
+            let coordinate = Coordinate(x_coordinate-1, y_coordinate);
+            let part_number = PartNumber::create(value, &coordinate);
+            parts_list.push(part_number);
+        };
 
         match char {
             '\u{0021}'..='\u{002d}' |

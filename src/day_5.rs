@@ -263,7 +263,7 @@ pub(crate) fn seed_to_destination() {
     let l = seeds.len();
     println!("{}",l);
 
-    let seed_to_soil_map = maps.get(0)
+    let seed_to_soil_map = maps.first()
         .map(|&map| create_map(map))
         .unwrap();
     let soil_to_fertilizer_map =  maps.get(1)

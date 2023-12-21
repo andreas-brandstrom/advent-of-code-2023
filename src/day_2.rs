@@ -190,6 +190,6 @@ fn extract_nr_of_a_color(rest: &[char]) -> u32 {
             let (_,last) = rest.split_at(rest.len()-3);
             extract_decimal_number(last)
         }
-        __ => 0
+        _ => 0
     }
 }
