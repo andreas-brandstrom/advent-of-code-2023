@@ -182,7 +182,14 @@ pub(crate) fn pipe_maze() {
 
     let (maze, starting_position) = parse_data(data);
 
+    let mut pipe_coordinats_1:Vec<(usize,usize)> = vec![];
+    let mut pipe_coordinats_2:Vec<(usize,usize)> = vec![];
+    pipe_coordinats_1.push(starting_position);
+
     let mut moves = initial_moves(maze, &starting_position);
+    pipe_coordinats_1.push(moves[0].1);
+    pipe_coordinats_2.push(moves[1].1);
+
     let mut steps:u32 = 1;
 
     while moves[0].1 != moves[1].1 {
@@ -195,12 +202,79 @@ pub(crate) fn pipe_maze() {
         steps += 1;
 
         moves = match next_moves[..] {
-            [m_1, m_2] => [m_1,m_2],
+            [m_1, m_2] => {
+                pipe_coordinats_1.push(m_1.1);
+                pipe_coordinats_2.push(m_2.1);
+                [m_1,m_2]
+            },
             _ => panic!()
         }
-    } 
+    }
 
-    println!("Steps {:?}",steps);
+    pipe_coordinats_1.pop();
+    pipe_coordinats_2.reverse();
+
+    pipe_coordinats_1.append(&mut pipe_coordinats_2);
+
+    let pipe_coordinates_orderd = pipe_coordinats_1.clone();
+
+    pipe_coordinats_1.sort();
+    let pipe_coordinats_sorted = pipe_coordinats_1;
+
+    let mut pipe_coordinats_iter = pipe_coordinats_sorted.iter();
+    let mut previus_coordinat = pipe_coordinats_iter.next().unwrap();
+
+    let mut horizontal_candidates:Vec<(usize,usize)> = vec![]; 
+    for coordinat in pipe_coordinats_iter {
+        match (previus_coordinat, coordinat) {
+            ((a,b),(c,d)) if a == c && d-b > 1 => {
+                let mut new_candidates:Vec<(usize,usize)> =  (b+1..*d).map(|y| (*a, y)).collect();
+                horizontal_candidates.append(&mut new_candidates);
+            }, 
+            _ => ()
+        };
+        previus_coordinat = coordinat;
+    }
+    
+    let mut orderd_iter = pipe_coordinates_orderd.iter();
+    let mut pair = [&(0_usize,0_usize),
+        orderd_iter.next().unwrap(),
+        orderd_iter.next().unwrap()];
+
+    let mut candidates:Vec<((usize,usize),i32)> =  horizontal_candidates.iter().map(|c| (*c,0)).collect();
+
+    for coord in orderd_iter {
+        pair.rotate_left(1);
+        pair[2] = coord;
+
+
+        for ((x,y), winding_sum) in candidates.iter_mut() {
+            if *x == pair[1].0 && *y <= pair[1].1 {
+                let x_diff = (
+                    pair[0].0.checked_sub(pair[1].0), 
+                    pair[1].0.checked_sub(pair[2].0)
+                );
+
+                match x_diff {
+                    (Some(0), Some(0)) => (),
+                    (Some(0), Some(_))|(Some(_),Some(0)) => *winding_sum+=5,
+                    (Some(0), None)|(None, Some(0)) =>  *winding_sum-=5,
+                    (Some(_), None) | (None, Some(_)) => (),
+                    (Some(_), Some(_)) => *winding_sum += 10,
+                    (None, None) => *winding_sum -= 10,
+                }
+            };
+        }
+    }
+
+    let indide_coord:Vec<(usize,usize)> = candidates.iter()
+        .filter(|c| c.1 != 0)
+        .map(|c| c.0)
+        .collect();
+
+    
+
+    println!("Steps {:?}, internal tiles {}",steps, indide_coord.len());
 }
 
 fn initial_moves(maze: na::Matrix<char, na::Const<140>, na::Const<140>, na::ArrayStorage<char, 140, 140>>, starting_position: &(usize, usize)) -> [(Move,(usize,usize));2] {
@@ -211,7 +285,9 @@ fn initial_moves(maze: na::Matrix<char, na::Const<140>, na::Const<140>, na::Arra
         .collect();
     
     match initial_moves[..] {
-        [m_1, m_2] => [m_1,m_2],
+        [m_1, m_2] => {
+            [m_1,m_2]
+        },
         _ => panic!()
     }
 }
