@@ -298,7 +298,7 @@ type Matrix140Char = na::Matrix<char, na::Const<140>, na::Const<140>, na::ArrayS
 fn parse_data(data: &str) -> (Matrix140Char, (usize, usize)) {
     let data = data.replace(' ', "");
 
-    let mut maze  = na::Matrix::<char, na::Const<140>, na::Const<140>, na::ArrayStorage<char, 140, 140>>::from_element('.');
+    let mut maze  = Matrix140Char::from_element('.');
 
     let mut starting_position = (0,0);
 
